@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from pytube import YouTube
-from moviepy.editor import AudioFileClip
+import moviepy
 import os
 import uuid
 
@@ -27,7 +27,7 @@ def convert_to_mp3():
 
         # Convertir en MP3
         output_file = os.path.join(TEMP_DIR, f"{uuid.uuid4()}.mp3")
-        clip = AudioFileClip(temp_file)
+        clip = moviepy.AudioFileClip(temp_file)
         clip.write_audiofile(output_file)
         clip.close()
 
