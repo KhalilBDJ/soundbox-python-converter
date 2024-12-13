@@ -1,0 +1,39 @@
+services:
+  python-converter:
+    build:
+      context: . # Indique que Dockerfile est dans le même répertoire
+    ports:
+      - "5000:5000" # Expose le service Python sur le port 5000
+    depends_on:
+      - postgres-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: soundbox_db
+      DATABASE_URL: postgres://admin:admin@postgres-db:5432/soundbox_db # URL pour se connecter à PostgreSQL
+    volumes:
+      - ./temp_audio:/app/temp_audio # Volume pour partager les fichiers audio générés
+    networks:
+      - app-network
+
+  postgres-db:
+    image: postgres:17
+    container_name: soundbox_postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: soundbox_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
