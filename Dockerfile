@@ -2,6 +2,7 @@ FROM python:3.13-slim
 
 # Installer les dépendances nécessaires, y compris ffmpeg et ffprobe
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg \
     git \
     && rm -rf /var/lib/apt/lists/*
 
