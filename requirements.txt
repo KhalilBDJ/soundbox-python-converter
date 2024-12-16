@@ -1,2 +1,3 @@
-Flask
-Pytube3
+Flask~=3.1.0
+Pytube
+pydub~=0.25.1

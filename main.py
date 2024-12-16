@@ -1,10 +1,10 @@
 import base64
 from flask import Flask, request, jsonify
-from pytube import YouTube
 import os
 import uuid
 from io import BytesIO
 from pydub import AudioSegment
+from pytubefix import YouTube
 
 app = Flask(__name__)
 
