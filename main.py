@@ -5,6 +5,7 @@ import uuid
 from io import BytesIO
 from pydub import AudioSegment
 from pytubefix import YouTube
+from yt_dlp import YoutubeDL
 
 app = Flask(__name__)
 
@@ -92,6 +93,72 @@ def trim_audio():
         return jsonify({
             "trimmed_audio_base64": trimmed_audio_base64
         }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+def download_audio_from_url(video_url):
+    """
+    Utilise yt_dlp pour télécharger l'audio depuis n'importe quelle URL compatible,
+    encode l'audio en base64, et retourne les informations.
+    """
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'outtmpl': f'{uuid.uuid4()}.%(ext)s',
+        'quiet': True,
+    }
+
+    with YoutubeDL(ydl_opts) as ydl:
+        info = ydl.extract_info(video_url, download=True)
+        video_title = info.get('title', 'Unknown Title')
+        video_duration = info.get('duration', 0)
+        file_path = ydl.prepare_filename(info)
+
+    # Lire les données du fichier téléchargé
+    with open(file_path, "rb") as audio_file:
+        encoded_audio = base64.b64encode(audio_file.read()).decode("utf-8")
+
+    # Supprimer le fichier temporaire
+    os.remove(file_path)
+
+    return {
+        "name": video_title,
+        "duration": video_duration,
+        "audio_base64": encoded_audio
+    }
+
+@app.route('/convert/instagram', methods=['POST'])
+def convert_instagram_to_audio():
+    try:
+        # Récupérer l'URL de la vidéo Instagram depuis la requête
+        data = request.json
+        video_url = data.get('url')
+        if not video_url:
+            return jsonify({"error": "URL is required"}), 400
+
+        # Télécharger et convertir l'audio
+        result = download_audio_from_url(video_url)
+
+        return jsonify(result), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/convert/tiktok', methods=['POST'])
+def convert_tiktok_to_audio():
+    try:
+        # Récupérer l'URL de la vidéo TikTok depuis la requête
+        data = request.json
+        video_url = data.get('url')
+        if not video_url:
+            return jsonify({"error": "URL is required"}), 400
+
+        # Télécharger et convertir l'audio
+        result = download_audio_from_url(video_url)
+
+        return jsonify(result), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
